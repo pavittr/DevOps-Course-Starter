@@ -16,10 +16,7 @@ def index():
 @app.route('/todo/add', methods = ['POST'])
 def create_new_todo():
     title = request.form['title']
-    add_item(title)
-
-
-    return index()
+    return add_item(title)
 
 if __name__ == '__main__':
     app.run()

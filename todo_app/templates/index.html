@@ -10,7 +10,7 @@
   <div class="row">
     <div class="col-md-12">
       <h2>Items</h2>
-      <ul class="list-group mb-4">
+      <ul id="todo_list" class="list-group mb-4">
         <!-- List the todo items here -->
         {% for item in items %}
         <li>{{ item.title }}</li>
@@ -23,7 +23,7 @@
   <div class="row">
     <div class="col-md-12">
       <h2>Add a new item</h2>
-      <form action="/todo/add" method="post">
+      <form id="new_todo_form" action="/todo/add" method="post">
         <label for="title">Film name:</label><br>
         <input type="text" id="title" name="title" value=""><br>
         <input type="submit" value="Submit">
@@ -31,4 +31,22 @@
     </div>
     
   </div>
+  <script>
+    form = document.getElementById('new_todo_form').addEventListener("submit", function(event) {
+      event.preventDefault()
+      formData = event.target
+      fetch(formData.action, {
+        method: formData.method,
+        body: new FormData(formData),
+      }).then((result) => result.text())
+      .then((rawText) => JSON.parse(rawText))
+      .then((newObj) => {
+        const todoList = document.getElementById('todo_list')
+        const newNode = document.createElement("li")
+        newNode.innerHTML = newObj.title
+        todoList.appendChild(newNode)
+      })
+    })
+
+  </script>
 {% endblock %}
