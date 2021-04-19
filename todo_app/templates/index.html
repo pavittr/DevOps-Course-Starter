@@ -12,7 +12,23 @@
       <h2>Items</h2>
       <ul class="list-group mb-4">
         <!-- List the todo items here -->
+        {% for item in items %}
+        <li>{{ item.title }}</li>
+        {% endfor %}
       </ul>
     </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Add a new item</h2>
+      <form action="/todo/add" method="post">
+        <label for="title">Film name:</label><br>
+        <input type="text" id="title" name="title" value=""><br>
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+    
   </div>
 {% endblock %}
