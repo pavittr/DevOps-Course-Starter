@@ -4,7 +4,7 @@
 {% block content %}
   <div class="jumbotron">
     <h1 class="display-4">To-Do App</h1>
-    <p class="lead">Just another to-do app.</p>
+    <p class="lead">This is not just any to-do app...</p>
   </div>
 
   <div class="row">
@@ -13,40 +13,74 @@
       <ul id="todo_list" class="list-group mb-4">
         <!-- List the todo items here -->
         {% for item in items %}
-        <li>{{ item.title }}</li>
+        <li id="li{{ item.id}}"><span>{{ item.title }} - </span><span id="status{{ item.id}})" onclick="updateStatus({{ item.id }}, event)">{{ item.status }}</span> <span onclick="deleteItem({{ item.id }})">(Delete)</span></li>
         {% endfor %}
+        <li id="new_item" ><form id="new_todo_form" action="/todo/add" method="post" onsubmit="createNewItem(event)")>
+        <label for="title">New Todo:</label> <input type="text" id="title" name="title" value="" /> <input type="submit" value="Submit" />
+      </form></li>
       </ul>
     </div>
 
   </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <h2>Add a new item</h2>
-      <form id="new_todo_form" action="/todo/add" method="post">
-        <label for="title">Film name:</label><br>
-        <input type="text" id="title" name="title" value=""><br>
-        <input type="submit" value="Submit">
-      </form>
-    </div>
-    
-  </div>
   <script>
-    form = document.getElementById('new_todo_form').addEventListener("submit", function(event) {
+    function createNewItem(event) {
       event.preventDefault()
       formData = event.target
       fetch(formData.action, {
         method: formData.method,
         body: new FormData(formData),
-      }).then((result) => result.text())
-      .then((rawText) => JSON.parse(rawText))
-      .then((newObj) => {
-        const todoList = document.getElementById('todo_list')
-        const newNode = document.createElement("li")
-        newNode.innerHTML = newObj.title
-        todoList.appendChild(newNode)
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
       })
-    })
+      .then((item) => {
+        const todoList = document.getElementById('todo_list')
+        const newItem = document.getElementById('new_item')
+        const newNode = document.createElement("li")
+        newNode.id = "li" + item.id
+        newNode.innerHTML = "<span>" + item.title + " - </span><span id=\"status" + item.id +")\" onclick=\"updateStatus("+ item.id +", event)\">"+ item.status + "</span> <span onclick=\"deleteItem(" + item.id + ")\">(Delete)</span>"
+        todoList.insertBefore(newNode, newItem)
+      })
+    }
 
+    function updateStatus(itemId, event) {
+      const currentStatus = event.target.innerHTML
+      var newStatus = 'Not Started'
+      if (newStatus == currentStatus) {
+        newStatus = 'Completed'
+      }
+      
+      fetch("/todo/"+ itemId +"/status", {
+        method: "PUT",
+        body: newStatus,
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((item) => {
+        event.target.innerHTML = item.status
+      }).catch(error => {
+        alert("Whoops! " + error)
+      })
+    }
+
+    function deleteItem(itemId) {
+      fetch("/todo/" + itemId, {
+        method: "delete",
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const li = document.getElementById("li" + itemId)
+        li.remove()
+      }).catch(error => {
+        alert("Whoops! " + error)
+      })
+    }
   </script>
 {% endblock %}
