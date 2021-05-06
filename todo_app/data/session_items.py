@@ -68,16 +68,17 @@ def save_item(item):
 
     return item
 
-def delete_item(itemId):
+def delete_item(item_id):
     """
     Deletes an existing item in the session. If no existing item matches the ID of the specified item, nothing is deleted.
 
     Args:
-        itemId: The item to delete.
+        item_id: The item to delete.
     """
     existing_items = get_items()
-    updated_items = list(filter(lambda item: item['id'] != itemId, existing_items))
+    deleted_item = next(filter(lambda item: item['id'] == item_id, existing_items))
+    existing_items.remove(deleted_item)
 
-    session['items'] = updated_items
+    session['items'] = existing_items
 
-    return  list(filter(lambda item: item['id'] == itemId, existing_items))[0]
+    return  deleted_item

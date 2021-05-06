@@ -13,10 +13,14 @@
       <ul id="todo_list" class="list-group mb-4">
         <!-- List the todo items here -->
         {% for item in items %}
-        <li id="li{{ item.id}}"><span>{{ item.title }} - </span><span id="status{{ item.id}})" onclick="updateStatus({{ item.id }}, event)">{{ item.status }}</span> <span onclick="deleteItem({{ item.id }})">(Delete)</span></li>
+        <li id="li{{ item.id}}">
+          <span>{{ item.title }} - </span>
+          <span id="status{{ item.id}})" onclick="updateStatus({{ item.id }}, event)">{{ item.status }}</span>
+          <span onclick="deleteItem({{ item.id }})">(Delete)</span>
+        </li>
         {% endfor %}
         <li id="new_item" ><form id="new_todo_form" action="/todo/add" method="post" onsubmit="createNewItem(event)")>
-        <label for="title">New Todo:</label> <input type="text" id="title" name="title" value="" /> <input type="submit" value="Submit" />
+        <label for="title">New Todo:</label> <input required type="text" id="title" name="title" value="" /> <input type="submit" value="Submit" />
       </form></li>
       </ul>
     </div>

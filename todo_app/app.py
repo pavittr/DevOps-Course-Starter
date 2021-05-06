@@ -10,6 +10,7 @@ app.config.from_object(Config)
 
 @app.route('/')
 def index():
+    
     items = sorted(get_items(), key=lambda item: item['status'], reverse=True)
     return render_template('index.html', items=items)
 
@@ -18,18 +19,18 @@ def create_new_todo():
     title = request.form['title']
     return add_item(title)
 
-@app.route('/todo/<itemId>/status', methods = ['PUT'])
-def change_state(itemId):
-    item = list(filter(lambda item: item['id'] == int(itemId), get_items())).pop()
+@app.route('/todo/<item_id>/status', methods = ['PUT'])
+def change_state(item_id):
+    item = next(filter(lambda item: item['id'] == int(item_id), get_items()))
     app.logger.info("Form data %s %s", request.form, request.get_data(as_text = True))
     item['status'] = request.get_data(as_text = True)
-    app.logger.info("Request to update Item %s: %s", itemId, item)
+    app.logger.info("Request to update Item %s: %s", item_id, item)
     return save_item(item)
 
-@app.route('/todo/<itemId>', methods = ['DELETE'])
-def delete_existing_todo(itemId):
-    app.logger.info('Request to delete ID %s', itemId)
-    return delete_item(int(itemId))
+@app.route('/todo/<item_id>', methods = ['DELETE'])
+def delete_existing_todo(item_id):
+    app.logger.info('Request to delete ID %s', item_id)
+    return delete_item(int(item_id))
 
 if __name__ == '__main__':
     app.run()
