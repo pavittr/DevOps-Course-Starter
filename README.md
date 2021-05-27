@@ -7,7 +7,7 @@ The project uses poetry for Python to create an isolated environment and manage 
 ### Poetry installation (Bash)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
 ```
 
 ### Poetry installation (PowerShell)
@@ -31,6 +31,24 @@ $ cp .env.template .env  # (first time only)
 ```
 
 The `.env` file is used by flask to set environment variables when running `flask run`. This enables things like development mode (which also enables features like hot reloading when you make a file change). There's also a [SECRET_KEY](https://flask.palletsprojects.com/en/1.1.x/config/#SECRET_KEY) variable which is used to encrypt the flask session cookie.
+
+## Accessing Trello APIs
+
+The application stores data in a Trello board. To set this up you will need a Trello developer account and a board ID. Follow the steps below to set up Trello access, your API key, and the board you will use to store your items on.
+
+1. To create a developer account visit [https://trello.com/signup] and create a new account. Once signed up you will drop into the Trello dashboard.
+2. Create a new board and give it a descriptive name (e.g. `Todo App`).
+3. In the browser window append `.json` to the end of the trello url (so [https://trello.com/b/abc123/todoapp] becomes [https://trello.com/b/abc123/todoapp.json])
+4. The browser window will display JSON related to the board. At the start will be an `ID` field. Make a note of this as you will need to add it to the `.env` as the `TRELLO_BOARD_ID` environment variable.
+5. Add the following two lists to the board:
+    * `Not Started`
+    * `Completed`
+6. Once this is done, navigate to [https://trello.com/app-key] and follow the instructions to create a Developer API Key and a Token.
+    * Its worth noting that the API key displays at the start of the page, however as of writing the token needs to be gathered from the a link on the same page that specifies that you need to geenrate a Token.
+7. Once you have these details set, update the `.env` file with the following variables:
+    * `TRELLO_SERVER_TOKEN` - Token from following the instructions to generate a Token from [https://trello.com/app-key]
+    * `TRELLO_API_KEY` - Developer key displayed at [https://trello.com/app-key]
+    * `TRELLO_BOARD_ID` - The ID found in the board's JSON output
 
 ## Running the App
 
