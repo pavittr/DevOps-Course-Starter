@@ -15,8 +15,8 @@
         {% for item in items %}
         <li id="li{{ item.id}}">
           <span>{{ item.title }} - </span>
-          <span id="status{{ item.id}})" onclick="updateStatus({{ item.id }}, event)">{{ item.status }}</span>
-          <span onclick="deleteItem({{ item.id }})">(Delete)</span>
+          <span id="status{{ item.id}}" onclick="updateStatus('{{ item.id }}', event)">{{ item.status }}</span>
+          <span onclick="deleteItem('{{ item.id }}')">(Delete)</span>
         </li>
         {% endfor %}
         <li id="new_item" ><form id="new_todo_form" action="/todo/add" method="post" onsubmit="createNewItem(event)")>
@@ -28,6 +28,7 @@
   </div>
 
   <script>
+  
     function createNewItem(event) {
       event.preventDefault()
       formData = event.target
@@ -45,7 +46,8 @@
         const newItem = document.getElementById('new_item')
         const newNode = document.createElement("li")
         newNode.id = "li" + item.id
-        newNode.innerHTML = "<span>" + item.title + " - </span><span id=\"status" + item.id +")\" onclick=\"updateStatus("+ item.id +", event)\">"+ item.status + "</span> <span onclick=\"deleteItem(" + item.id + ")\">(Delete)</span>"
+        newNode.innerHTML = `<span>${item.title} - </span><span id="status${item.id}" onclick="updateStatus('${item.id}', event)">${item.status}</span> <span onclick="deleteItem('${item.id}')">(Delete)</span>` 
+
         todoList.insertBefore(newNode, newItem)
       })
     }
