@@ -1,4 +1,5 @@
 import os
+from todo_app.view_model import ViewModel
 from todo_app.items.trello.transport import TrelloTransport
 from flask import Flask, render_template, request
 
@@ -15,7 +16,8 @@ item_registry = Items(trello_transport, os.environ.get('TRELLO_BOARD_ID'))
 @app.route('/')
 def index():
     items = sorted(item_registry.get_items(), key=lambda item: item.status, reverse=True)
-    return render_template('index.html', items=items)
+    item_view_model = ViewModel(items)
+    return render_template('index.html', view_model=item_view_model)
 
 @app.route('/todo/add', methods = ['POST'])
 def create_new_todo():
