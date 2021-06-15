@@ -10,88 +10,22 @@
   <div class="row">
     <div class="col-md-12">
       <h2>Items</h2>
-      <div>
-        <button type="button" class="btn btn-primary" onclick="createNewItem()">Create</button>
+      <form id="new_item_form">
         <label for="title">New Todo:</label> <input required type="text" id="new_item_title" name="title" value="" />
-      </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
 
       <h3>To Do</h3>
       <ul id="todo_list" class="list-group">
-        <!-- List the todo items here -->
-        {% for item in view_model.to_do_items %}
-        <li class="list-group-item" id="li{{ item.id}}" >
-          <a  data-toggle="collapse" class="row list-group-item-action" href="#collapse{{ item.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ item.id }}">
-            {{ item.title }}
-          </a>
-          <div class="collapse row" id="collapse{{ item.id }}">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-secondary active">
-                <input onchange="updateStatus('{{item.id}}', 'To Do')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionToDo" autocomplete="off" checked> Todo
-              </label>
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'Doing')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDoing" autocomplete="off"> Doing
-              </label>
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'Done')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDone" autocomplete="off"> Done
-              </label>
-              <button onclick="deleteItem('{{ item.id }}')" class="btn btn-outline-danger">Delete Item</button>
-            </div>
-          </div>
-        </li>
-        {% endfor %}
       </ul>
 
 
       <h3>Doing</h3>
       <ul id="doing_list" class="list-group">
-        <!-- List the todo items here -->
-        {% for item in view_model.doing_items %}
-        <li class="list-group-item" id="li{{ item.id}}" >
-          <a  data-toggle="collapse" class="row list-group-item-action" href="#collapse{{ item.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ item.id }}">
-            {{ item.title }}
-          </a>
-          <div class="collapse row" id="collapse{{ item.id }}">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'To Do')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionToDo" autocomplete="off" > Todo
-              </label>
-              <label class="btn btn-secondary active">
-                <input onchange="updateStatus('{{item.id}}', 'Doing')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDoing" autocomplete="off" checked> Doing
-              </label>
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'Done')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDone" autocomplete="off"> Done
-              </label>
-              <button onclick="deleteItem('{{ item.id }}')" class="btn btn-outline-danger">Delete Item</button>
-            </div>
-          </div>
-        </li>
-        {% endfor %}
       </ul>
 
       <h3>Done</h3>
       <ul id="done_list" class="list-group">
-        <!-- List the todo items here -->
-        {% for item in view_model.done_items %}
-        <li class="list-group-item" id="li{{ item.id}}" >
-          <a  data-toggle="collapse" class="row list-group-item-action" href="#collapse{{ item.id }}" role="button" aria-expanded="false" aria-controls="collapse{{ item.id }}">
-            {{ item.title }}
-          </a>
-          <div class="collapse row" id="collapse{{ item.id }}">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'To Do')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionToDo" autocomplete="off" > Todo
-              </label>
-              <label class="btn btn-secondary">
-                <input onchange="updateStatus('{{item.id}}', 'Doing')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDoing" autocomplete="off" > Doing
-              </label>
-              <label class="btn btn-secondary active">
-                <input onchange="updateStatus('{{item.id}}', 'Done')" type="radio" name="{{ item.id }}ListOption" id="{{ item.id }}ListOptionDone" autocomplete="off" checked> Done
-              </label>
-              <button onclick="deleteItem('{{ item.id }}')" class="btn btn-outline-danger">Delete Item</button>
-            </div>
-          </div>
-        </li>
-        {% endfor %}
       </ul>
 
     </div>
@@ -99,8 +33,28 @@
   </div>
 
   <script>
+    function newRadioButton(id, type, label, selected) {
+        todoLabel = document.createElement("label")
+        todoLabel.classList.add("btn", "btn-secondary")
+        if (selected) {
+          todoLabel.classList.add("active")
+        }
 
-    function newTodoNode(item) {
+        todoInput = document.createElement("input")
+        todoInput.onchange = function() { updateStatus(id, label)}
+        todoInput.type = 'radio'
+        todoInput.name = "" + id + "ListOption"
+        todoInput.id = "" + id + "ListOption" + type
+        todoInput.setAttribute("autocomplete", "off")
+        todoInput.checked = selected
+        
+        todoLabel.appendChild(todoInput)
+        textNode = document.createTextNode(label)
+        todoLabel.appendChild(textNode)
+        return todoLabel;
+    }
+
+    function newTodoNode(item, list_name) {
         const newNode = document.createElement("li")
         newNode.classList.add("list-group-item")
         newNode.id = "li" + item.id
@@ -119,51 +73,38 @@
         menu_options = document.createElement("div")
         menu_options.classList.add("collapse", "row")
         menu_options.id = "collapse"+item.id
-        menu_options.innerHTML = 'wibble';
         newNode.appendChild(menu_options);
 
 
-        // const button = document.createElement("button");
-        // button.onclick = function() {deleteItem(todo.id)};
-        // button.type = "button"
-        // button.classList.add("btn","btn-outline-danger","btn-sm")
-        // button.innerText = 'X'
 
-        // const date = document.createElement("input");
-        // date.id = 'date' + todo.id
-        // date.type = "text"
-        // date.classList.add("date","form-control")
-
-        // const dateWrapper = document.createElement("div")
-        // dateWrapper.classList.add("col-auto")
-        // dateWrapper.appendChild(date)
+        buttonGroup = document.createElement("div")
+        buttonGroup.classList.add("btn-group", "btn-group-toggle")
+        buttonGroup.dataset.toggle = 'buttons'
+        menu_options.appendChild(buttonGroup)
 
 
-        // const status = document.createElement("div");
-        // status.id = 'status' + todo.id
-        // status.onclick = function(e) {updateStatus(todo.id, e)};
-        // status.classList.add("col-auto")
-        // status.innerText = todo.status
+        todoDiv = newRadioButton(item.id, 'ToDo', 'To Do', list_name == 'todo')
+        doingDiv = newRadioButton(item.id, 'Doing', 'Doing', list_name == 'doing')
+        doneDiv = newRadioButton(item.id, 'Done', 'Done', list_name == 'done')
 
-        // const title = document.createElement("div");
-        // title.classList.add("col-auto")
-        // title.innerText = todo.title
+        buttonGroup.appendChild(todoDiv)
+        buttonGroup.appendChild(doingDiv)
+        buttonGroup.appendChild(doneDiv)
 
-        // newNode.appendChild(buttonWrapper)
-        // newNode.appendChild(dateWrapper)
-        // newNode.appendChild(status)
-        // newNode.appendChild(title)
+        deleteButton = document.createElement("button")
+        deleteButton.classList.add("btn", "btn-outline-danger")
+        deleteButton.innerHTML = 'Delte Item'
+        deleteButton.onclick = function() { deleteItem(item.id)}
+
+        buttonGroup.appendChild(deleteButton)
 
         return newNode
     }
 
   
     function createNewItem() {
-    //  event.preventDefault()
-      name  = document.getElementById("new_item_title").value;
+      const formData = new FormData( newItemForm );
 
-      formData = new FormData();
-      formData.append('title', name)
 
       fetch('/todo/add', {
         method: 'POST',
@@ -176,11 +117,19 @@
       })
       .then((item) => {
         const todoList = document.getElementById('todo_list')
-        newNode = newTodoNode(item);
+        newNode = newTodoNode(item, 'todo');
         
         todoList.appendChild(newNode)
       })
     }
+
+    const newItemForm = document.getElementById( "new_item_form" );
+
+    newItemForm.addEventListener( "submit", function ( event ) {
+      event.preventDefault();
+
+      createNewItem();
+    } );
 
     function updateStatus(itemId, newStatus) {
       fetch("/todo/"+ itemId +"/status", {
@@ -222,5 +171,32 @@
         alert("Whoops! " + error)
       })
     }
+
+    function getItems(status, node_id_to_append_to) {
+      fetch("/todo?status="+status, {
+        method: "GET",
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((todos) => {
+
+        const todoList = document.getElementById(node_id_to_append_to)
+        todos.forEach(todo => todoList.appendChild(newTodoNode(todo, status)));
+
+      }).catch(error => {
+        alert("Whoops! " + error)
+      })
+    }
+
+    window.addEventListener('load', (event) => {
+      getItems("todo", "todo_list");
+      getItems("doing", "doing_list");
+      getItems("done", "done_list");
+  
+    });
+
   </script>
 {% endblock %}

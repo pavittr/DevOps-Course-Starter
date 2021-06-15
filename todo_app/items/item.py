@@ -1,4 +1,4 @@
-from flask.json import jsonify
+import json
 
 class Item:
     
@@ -7,9 +7,12 @@ class Item:
         self.title = title
         self.status = status
 
-    def toJSON(self):
-        return jsonify(dict(
-            id=self.id,
-            title=self.title,
-            status=self.status
-        ))
+class ItemEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Item):
+            return dict(
+            id=obj.id,
+            title=obj.title,
+            status=obj.status
+        )
+        return json.JSONEncoder.default(self, obj)

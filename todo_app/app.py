@@ -1,4 +1,6 @@
+import json
 import os
+from todo_app.items.item import ItemEncoder
 from todo_app.view_model import ViewModel
 from todo_app.items.trello.transport import TrelloTransport
 from flask import Flask, render_template, request
@@ -15,19 +17,32 @@ item_registry = Items(trello_transport, os.environ.get('TRELLO_BOARD_ID'))
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/todo')
+def get_all_items():
     items = sorted(item_registry.get_items(), key=lambda item: item.status, reverse=True)
     item_view_model = ViewModel(items)
-    return render_template('index.html', view_model=item_view_model)
+    status = request.args.get('status')
+    switch = {
+        "todo": item_view_model.to_do_items,
+        "doing": item_view_model.doing_items,
+        "done": item_view_model.done_items,
+    }
+
+    return json.dumps(sorted(switch.get(status, item_view_model.items), key=lambda item: item.status, reverse=True), cls=ItemEncoder)
 
 @app.route('/todo/add', methods = ['POST'])
 def create_new_todo():
     title = request.form['title']
-    return item_registry.add_item(title).toJSON()
+    new_item = item_registry.add_item(title)
+    return json.dumps(new_item, cls=ItemEncoder)
 
 @app.route('/todo/<item_id>/status', methods = ['PUT'])
 def change_state(item_id):
     app.logger.info("Form data for %s: %s %s", item_id, request.form, request.get_data(as_text = True))
-    return item_registry.save_item({'id':item_id, 'status': request.get_data(as_text = True)}).toJSON()
+    new_item = item_registry.save_item({'id':item_id, 'status': request.get_data(as_text = True)})
+    return json.dumps(new_item, cls=ItemEncoder)
 
 @app.route('/todo/<item_id>', methods = ['DELETE'])
 def delete_existing_todo(item_id):

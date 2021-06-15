@@ -68,3 +68,13 @@ You should see output similar to the following:
  * Debugger PIN: 226-556-590
 ```
 Now visit [`http://localhost:5000/`](http://localhost:5000/) in your web browser to view the app.
+
+## Running tests
+
+The app uses `pyest` to run most tests. To get the tests up and running run the following command:
+
+```
+poetry run pytest --cov=todo_app
+```
+
+As well as running the tests this will also give you coverage info to understand where tests need to be added.
