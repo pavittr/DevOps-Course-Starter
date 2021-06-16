@@ -1,22 +1,32 @@
 import json
 import os
+
 from todo_app.items.item import ItemEncoder
 from todo_app.view_model import ViewModel
 from todo_app.items.trello.transport import TrelloTransport
 from flask import Flask, render_template, request
 
-from todo_app.flask_config import Config
-
 from todo_app.items.trello.items import Items
 
-app = Flask(__name__)
-app.config.from_object(Config)
 trello_transport = TrelloTransport(os.environ.get('TRELLO_API_KEY'), 
         os.environ.get('TRELLO_SERVER_TOKEN'))
 item_registry = Items(trello_transport, os.environ.get('TRELLO_BOARD_ID'))
 
+def create_app():
+    app = Flask(__name__)
+    # We specify the full path and remove the import for this config so
+    # it loads the env variables when the app is created, rather than when this file is imported
+    app.config.from_object('todo_app.flask_config.Config')
+    # All the routes and setup code etc
+
+    return app
+
+#TODO should the app still be created here? Or in main?
+app = create_app()
+
 @app.route('/')
 def index():
+    app.logger.info("Request received to load root")
     return render_template('index.html')
 
 @app.route('/todo')
