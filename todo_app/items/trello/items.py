@@ -26,7 +26,8 @@ class Items:
         Board ID is fixed at run time and cannot be changed by users
         """
         r = self.trello_transport.call_trello('GET', f"/1/boards/{self.board_id}/lists")
-        return list(map(lambda list_json: List.fromJson(list_json), r.json()))
+        raw_json = r.json()
+        return list(map(lambda list_json: List.fromJson(list_json), raw_json))
 
     def get_list_by_name(list_name, list_map):
         """

@@ -49,6 +49,7 @@ The application stores data in a Trello board. To set this up you will need a Tr
     * `TRELLO_SERVER_TOKEN` - Token from following the instructions to generate a Token from [https://trello.com/app-key]
     * `TRELLO_API_KEY` - Developer key displayed at [https://trello.com/app-key]
     * `TRELLO_BOARD_ID` - The ID found in the board's JSON output
+    * `TRELLO_WORKSPACE_ID` - Boards need to be assigned to a workspace. If you navigate to `https://trello.com` you will be redirected to a URL containing your workspace ID (something like `workspace123456`). Set this variable to that value.
 
 ## Running the App
 
@@ -78,3 +79,10 @@ poetry run pytest --cov=todo_app
 ```
 
 As well as running the tests this will also give you coverage info to understand where tests need to be added.
+
+### Integration tests using Selenium
+
+To run the selenium tests Firefox must be installed locally, and the Gecko driver must be on the PATH.
+
+1. Download Firefox from [https://www.mozilla.org/en-GB/firefox/new/](https://www.mozilla.org/en-GB/firefox/new/)
+2. Download the Gecko driver from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases). Extract the driver and ensure it is on your PATH.
