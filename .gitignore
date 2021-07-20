@@ -121,3 +121,9 @@ env/
 
 # Vim files
 *.un~
+
+# Vagrant files
+.vagrant
+logs.txt
+
+*.log
