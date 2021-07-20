@@ -1,6 +1,12 @@
 import os
 from todo_app.items.item  import Item
 from todo_app.items.trello.list import List
+from enum import Enum
+
+class ItemState(Enum):
+    TODO = 'To Do'
+    DOING = 'Doing'
+    DONE = 'Done'
 
 class Items:
     def __init__(self, trello_transport, board_id) -> None:
@@ -20,7 +26,8 @@ class Items:
         Board ID is fixed at run time and cannot be changed by users
         """
         r = self.trello_transport.call_trello('GET', f"/1/boards/{self.board_id}/lists")
-        return list(map(lambda list_json: List.fromJson(list_json), r.json()))
+        raw_json = r.json()
+        return list(map(lambda list_json: List.fromJson(list_json), raw_json))
 
     def get_list_by_name(list_name, list_map):
         """
@@ -32,7 +39,7 @@ class Items:
         """
         Fetches cards from Trello
         """
-        lists = list(filter(lambda list: list.name in ['Not Started', 'Completed'], self.get_lists()))
+        lists = list(filter(lambda list: list.name in [i.value for i in  ItemState], self.get_lists()))
         cards = []
         for req_list in lists:
             r = self.trello_transport.call_trello('GET', f"/1/lists/{req_list.id}/cards")
@@ -47,7 +54,7 @@ class Items:
             item: The item to create.
         """
         lists = self.get_lists()
-        todoList = Items.get_list_by_name('Not Started', lists)
+        todoList = Items.get_list_by_name(ItemState.TODO.value, lists)
         r = self.trello_transport.call_trello('POST', '/1/cards', {'idList': todoList.id, 'name': title})
         return Items.item_from_trello(r.json(), lists)
 

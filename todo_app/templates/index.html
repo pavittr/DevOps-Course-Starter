@@ -10,31 +10,105 @@
   <div class="row">
     <div class="col-md-12">
       <h2>Items</h2>
-      <ul id="todo_list" class="list-group mb-4">
-        <!-- List the todo items here -->
-        {% for item in items %}
-        <li id="li{{ item.id}}">
-          <span>{{ item.title }} - </span>
-          <span id="status{{ item.id}}" onclick="updateStatus('{{ item.id }}', event)">{{ item.status }}</span>
-          <span onclick="deleteItem('{{ item.id }}')">(Delete)</span>
-        </li>
-        {% endfor %}
-        <li id="new_item" ><form id="new_todo_form" action="/todo/add" method="post" onsubmit="createNewItem(event)")>
-        <label for="title">New Todo:</label> <input required type="text" id="title" name="title" value="" /> <input type="submit" value="Submit" />
-      </form></li>
+      <form id="new_item_form">
+        <label for="title">New Todo:</label> <input required type="text" id="new_item_title" name="title" value="" />
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+
+      <h3>To Do</h3>
+      <ul id="todo_list" class="list-group">
       </ul>
+
+
+      <h3>Doing</h3>
+      <ul id="doing_list" class="list-group">
+      </ul>
+
+      <h3>Done</h3>
+      <ul id="done_list" class="list-group">
+      </ul>
+
     </div>
 
   </div>
 
   <script>
+    function newRadioButton(id, type, label, selected) {
+        todoLabel = document.createElement("label")
+        todoLabel.classList.add("btn", "btn-secondary")
+        if (selected) {
+          todoLabel.classList.add("active")
+        }
+
+        todoInput = document.createElement("input")
+        todoInput.onchange = function() { updateStatus(id, label)}
+        todoInput.type = 'radio'
+        todoInput.name = "" + id + "ListOption"
+        todoInput.id = "" + id + "ListOption" + type
+        todoInput.setAttribute("autocomplete", "off")
+        todoInput.checked = selected
+        
+        todoLabel.appendChild(todoInput)
+        textNode = document.createTextNode(label)
+        todoLabel.appendChild(textNode)
+        return todoLabel;
+    }
+
+    function newTodoNode(item, list_name) {
+        const newNode = document.createElement("li")
+        newNode.classList.add("list-group-item")
+        newNode.id = "li" + item.id
+
+        title = document.createElement("a")
+        title.classList.add("row", "list-group-item-action")
+        title.dataset.toggle = 'collapse'
+        title.setAttribute('href', "#collapse"+item.id);
+        title.setAttribute('role', 'button');
+        title.setAttribute('aria-expanded', 'false');
+        title.setAttribute('aria-controls', "collapse"+item.id);
+        title.innerHTML = item.title;
+        newNode.appendChild(title);
+
+
+        menu_options = document.createElement("div")
+        menu_options.classList.add("collapse", "row")
+        menu_options.id = "collapse"+item.id
+        newNode.appendChild(menu_options);
+
+
+
+        buttonGroup = document.createElement("div")
+        buttonGroup.classList.add("btn-group", "btn-group-toggle")
+        buttonGroup.dataset.toggle = 'buttons'
+        menu_options.appendChild(buttonGroup)
+
+
+        todoDiv = newRadioButton(item.id, 'ToDo', 'To Do', list_name == 'todo')
+        doingDiv = newRadioButton(item.id, 'Doing', 'Doing', list_name == 'doing')
+        doneDiv = newRadioButton(item.id, 'Done', 'Done', list_name == 'done')
+
+        buttonGroup.appendChild(todoDiv)
+        buttonGroup.appendChild(doingDiv)
+        buttonGroup.appendChild(doneDiv)
+
+        deleteButton = document.createElement("button")
+        deleteButton.classList.add("btn", "btn-outline-danger")
+        deleteButton.innerHTML = 'Delete Item'
+        deleteButton.onclick = function() { deleteItem(item.id)}
+
+        buttonGroup.appendChild(deleteButton)
+
+        return newNode
+    }
+
   
-    function createNewItem(event) {
-      event.preventDefault()
-      formData = event.target
-      fetch(formData.action, {
-        method: formData.method,
-        body: new FormData(formData),
+    function createNewItem() {
+      const formData = new FormData( newItemForm );
+
+
+      fetch('/todo/add', {
+        method: 'POST',
+        body: formData,
       }).then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -43,22 +117,21 @@
       })
       .then((item) => {
         const todoList = document.getElementById('todo_list')
-        const newItem = document.getElementById('new_item')
-        const newNode = document.createElement("li")
-        newNode.id = "li" + item.id
-        newNode.innerHTML = `<span>${item.title} - </span><span id="status${item.id}" onclick="updateStatus('${item.id}', event)">${item.status}</span> <span onclick="deleteItem('${item.id}')">(Delete)</span>` 
-
-        todoList.insertBefore(newNode, newItem)
+        newNode = newTodoNode(item, 'todo');
+        
+        todoList.appendChild(newNode)
       })
     }
 
-    function updateStatus(itemId, event) {
-      const currentStatus = event.target.innerHTML
-      var newStatus = 'Not Started'
-      if (newStatus == currentStatus) {
-        newStatus = 'Completed'
-      }
-      
+    const newItemForm = document.getElementById( "new_item_form" );
+
+    newItemForm.addEventListener( "submit", function ( event ) {
+      event.preventDefault();
+
+      createNewItem();
+    } );
+
+    function updateStatus(itemId, newStatus) {
       fetch("/todo/"+ itemId +"/status", {
         method: "PUT",
         body: newStatus,
@@ -69,7 +142,17 @@
         return response.json();
       })
       .then((item) => {
-        event.target.innerHTML = item.status
+        var listItem = document.getElementById("li"+itemId);
+        switch(newStatus) {
+          case 'To Do': document.getElementById("todo_list").appendChild(listItem); 
+                        break;
+          case 'Doing': document.getElementById("doing_list").appendChild(listItem); 
+                        break;
+          case 'Done': document.getElementById("done_list").appendChild(listItem); 
+                        break;
+        }
+        $('#collapse'+itemId).collapse('hide')
+  
       }).catch(error => {
         alert("Whoops! " + error)
       })
@@ -88,5 +171,32 @@
         alert("Whoops! " + error)
       })
     }
+
+    function getItems(status, node_id_to_append_to) {
+      fetch("/todo?status="+status, {
+        method: "GET",
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((todos) => {
+
+        const todoList = document.getElementById(node_id_to_append_to)
+        todos.forEach(todo => todoList.appendChild(newTodoNode(todo, status)));
+
+      }).catch(error => {
+        alert("Whoops! " + error)
+      })
+    }
+
+    window.addEventListener('load', (event) => {
+      getItems("todo", "todo_list");
+      getItems("doing", "doing_list");
+      getItems("done", "done_list");
+  
+    });
+
   </script>
 {% endblock %}
