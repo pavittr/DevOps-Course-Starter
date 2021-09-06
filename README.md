@@ -51,7 +51,7 @@ The application stores data in a Trello board. To set this up you will need a Tr
     * `TRELLO_BOARD_ID` - The ID found in the board's JSON output
     * `TRELLO_WORKSPACE_ID` - Boards need to be assigned to a workspace. If you navigate to `https://trello.com` you will be redirected to a URL containing your workspace ID (something like `workspace123456`). Set this variable to that value.
 
-## Running the App
+## Running the App directly
 
 Once the all dependencies have been installed, start the Flask app in development mode within the poetry environment by running:
 ```bash
@@ -69,6 +69,51 @@ You should see output similar to the following:
  * Debugger PIN: 226-556-590
 ```
 Now visit [`http://localhost:5000/`](http://localhost:5000/) in your web browser to view the app.
+
+## Using Docker
+
+The application is designed to be runnable in Docker as both a development and production version.
+
+### Docker in Development 
+
+The docker image can be built using the following command from the root of the project:
+
+```
+docker build  --target development --tag todo-app:dev .
+```
+
+This can be followed by running the app with:
+
+```
+docker run --env-file ./.env -p 5000:5000 --mount type=bind,source="$(pwd)"/todo_app,target=/app/todo_app todo-app:dev
+```
+
+Note that the app can now be requested by navigating to http://localhst:5000. The files on the local filesystem will be used to run the app, so any changes made will be reflected inside the container just as they are int he non-docker verison.
+
+### Docker in Production
+
+To build the production image, run the following command:
+
+```
+docker build --target production --tag todo-app:prod .
+```
+
+This can then be deployed with the following command:
+
+```
+docker run --env-file ./.env -p 8000:8000 todo-app:prod
+```
+
+Note that this time the files cannot be changed from outside the container. To request this version, navigate to http://localhost:8000 in  a browser.
+
+
+### Running in the background
+
+By default both dev and prod versions will launch in the foreground and so block use of the terminal. If you would like to detach from the process instead, you can use the -d flag to detach from the shell that launches the container. If you wish to view the container logs, you'll need to find the container name (printed by the run command) and then run the following command:
+
+```
+docker logs <CONTAINER_NAME>
+```
 
 ## Running tests
 

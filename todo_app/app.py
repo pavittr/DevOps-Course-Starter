@@ -10,6 +10,8 @@ from flask import Flask, render_template, request
 
 from todo_app.items.trello.items import Items
 
+
+
 def create_app():
     app = Flask(__name__)
     # We specify the full path and remove the import for this config so
@@ -61,6 +63,4 @@ def create_app():
 
     return app
 
-if __name__ == '__main__':
-    app = create_app()
-    app.run()
+application = create_app()
