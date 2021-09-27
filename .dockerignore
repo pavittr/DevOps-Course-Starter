@@ -1,0 +1,12 @@
+.*.un~
+*.log
+.env
+.env.template
+.env.test
+.git
+.github
+.gitignore
+.vagrant
+Vagrantfile
+.coverage
+.pytest_cache
