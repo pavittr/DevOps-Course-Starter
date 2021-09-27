@@ -10,4 +10,3 @@
 Vagrantfile
 .coverage
 .pytest_cache
-poetry.lock

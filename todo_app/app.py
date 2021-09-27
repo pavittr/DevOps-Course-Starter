@@ -62,5 +62,3 @@ def create_app():
         return Response("{'status':'up'}", status=200, mimetype='application/json')
 
     return app
-
-application = create_app()
