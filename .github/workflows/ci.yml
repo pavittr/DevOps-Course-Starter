@@ -14,8 +14,11 @@ jobs:
       - name: List files in the repository
         run: |
           ls -la ${{ github.workspace }}
-      - name: List files in the repository
+      - name: Build test image
         run: |
           docker build -t test-image --target test .
+      - name: Run unit and integration tests
+        run: |
+          docker run --env-file=.env.test test-image todo_app
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
