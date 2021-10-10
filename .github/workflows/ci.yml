@@ -20,5 +20,13 @@ jobs:
       - name: Run unit and integration tests
         run: |
           docker run --env-file=.env.test test-image todo_app
+      - name: Run end to end tests
+        run: |
+          docker run \
+          -e SECRET_KEY=secret \
+          -e TRELLO_SERVER_TOKEN=${{ secrets.TRELLO_SERVER_TOKEN }} \
+          -e TRELLO_API_KEY=${{ secrets.TRELLO_API_KEY }} \
+          -e TRELLO_WORKSPACE_ID=${{ secrets.TRELLO_WORKSPACE_ID }} \
+          test-image tests_e2e
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
