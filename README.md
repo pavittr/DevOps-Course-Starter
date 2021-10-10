@@ -164,3 +164,11 @@ docker run --env-file=.env my-test-image tests_e2e
 ```
 
 Note the primary difference between the two types of test here is that whilst the unit tests use the mocked credentials, the end to end tests require a real set of Trello credentials (no changes to the main Trello board will be made).
+
+## Github Actions
+
+The repository will be automatically built onwhe a PR is created. If you wish to fork the repo and set up the Github actions, you will need to create secrets for the following variables:
+
+* TRELLO_SERVER_TOKEN
+* TRELLO_API_KEY
+* TRELLO_WORKSPACE_ID
