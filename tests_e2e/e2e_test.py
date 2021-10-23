@@ -28,7 +28,7 @@ def wait_for_up():
             pass
 
 def get_board():
-    file_path = find_dotenv('.env')
+    file_path = find_dotenv(usecwd=True)
     load_dotenv(file_path, override=True)
     # Create the new board & update the board id environment variable
     trello_transport = TrelloTransport(os.environ.get('TRELLO_API_KEY'), os.environ.get('TRELLO_SERVER_TOKEN'))
@@ -51,13 +51,22 @@ def app_with_temp_board():
     thread.join(1)
     boards.delete_trello_board(board_id)
 
+@pytest.fixture
+def driver(request):
+    if request.param == 'chrome_driver':
+        opts = webdriver.ChromeOptions()
+        opts.add_argument('--headless')
+        opts.add_argument('--no-sandbox')
+        opts.add_argument('--disable-dev-shm-usage')
+        with webdriver.Chrome(options=opts) as driver:
+            yield driver
+    elif request.param == 'firefox_driver':
+        with webdriver.Firefox() as driver:
+            yield driver
+    else:
+        raise ValueError("unrecognised driver " + request.param)
 
-@pytest.fixture(scope="module")
-def driver():
-    with webdriver.Firefox() as driver:
-        yield driver
-
-
+@pytest.mark.parametrize('driver', ['chrome_driver', 'firefox_driver'], indirect=True)
 def test_task_journey(driver, app_with_temp_board):
     driver.get('http://localhost:5000/')
     assert driver.title == 'To-Do App'

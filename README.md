@@ -44,7 +44,7 @@ The application stores data in a Trello board. To set this up you will need a Tr
     * `Not Started`
     * `Completed`
 6. Once this is done, navigate to [https://trello.com/app-key] and follow the instructions to create a Developer API Key and a Token.
-    * Its worth noting that the API key displays at the start of the page, however as of writing the token needs to be gathered from the a link on the same page that specifies that you need to geenrate a Token.
+    * Its worth noting that the API key displays at the start of the page, however as of writing the token needs to be gathered from the a link on the same page that specifies that you need to generate a Token.
 7. Once you have these details set, update the `.env` file with the following variables:
     * `TRELLO_SERVER_TOKEN` - Token from following the instructions to generate a Token from [https://trello.com/app-key]
     * `TRELLO_API_KEY` - Developer key displayed at [https://trello.com/app-key]
@@ -117,17 +117,58 @@ docker logs <CONTAINER_NAME>
 
 ## Running tests
 
-The app uses `pyest` to run most tests. To get the tests up and running run the following command:
+The tests are broken into two sections. These are the unit tests (part of the application) and end to end tests which provide a higher level test flow but require communication to a Trello board.
+
+To run just the unit tests, issue the following command from the root of the project:
 
 ```
-poetry run pytest --cov=todo_app
+poetry run pytest --cov=todo_app todo_app
 ```
 
 As well as running the tests this will also give you coverage info to understand where tests need to be added.
 
-### Integration tests using Selenium
+### End to end tests using Selenium
 
-To run the selenium tests Firefox must be installed locally, and the Gecko driver must be on the PATH.
+The end to end tests use both Firefox and Chrome, and connect to the Trello backend to create a test board and then manipulate it. In order to get these working you will need to ensure you have both browsers installed as well as the corresponding Selenium drivers. Follow the instructions below to do this.
 
-1. Download Firefox from [https://www.mozilla.org/en-GB/firefox/new/](https://www.mozilla.org/en-GB/firefox/new/)
-2. Download the Gecko driver from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases). Extract the driver and ensure it is on your PATH.
+1. Make sure you have valid Trello credentials in your .env file as listed above (i.e. TRELLO_SERVER_TOKEN and TRELLO_API_KEY).
+2. Download Firefox from [https://www.mozilla.org/en-GB/firefox/new/](https://www.mozilla.org/en-GB/firefox/new/)
+3. Download the Gecko driver from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases). Extract the driver and ensure it is on your PATH.
+4. Check which version of Chrome you have installed (go to `chrome://settings/help` in the browser and look for the Version string)
+5. Go to [https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads) and select the driver relating to the OS and Chrome version you are using. Again, ensure this is extracted to somewhere on your PATH.
+
+To run the tests after following these steps, issue the following command:
+
+```
+poetry run pytest tests_e2e
+```
+
+### Testing in docker
+
+Both sets of tests can be run from inside a docker container. To build the docker test container issue the following command:
+
+```
+docker build --target test --tag my-test-image .
+```
+
+Once this is built, to run the unit tests run the following command:
+
+```
+docker run --env-file=.env.test my-test-image todo_app
+```
+
+To run the end to end tests, issue the following command:
+
+```
+docker run --env-file=.env my-test-image tests_e2e
+```
+
+Note the primary difference between the two types of test here is that whilst the unit tests use the mocked credentials, the end to end tests require a real set of Trello credentials (no changes to the main Trello board will be made).
+
+## Github Actions
+
+The repository will be automatically built onwhe a PR is created. If you wish to fork the repo and set up the Github actions, you will need to create secrets for the following variables:
+
+* TRELLO_SERVER_TOKEN
+* TRELLO_API_KEY
+* TRELLO_WORKSPACE_ID
