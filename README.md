@@ -167,8 +167,16 @@ Note the primary difference between the two types of test here is that whilst th
 
 ## Github Actions
 
-The repository will be automatically built onwhe a PR is created. If you wish to fork the repo and set up the Github actions, you will need to create secrets for the following variables:
+GitHub actions are used to build and test the project on pushes as well as when a PR is raised. If you wish to fork the repo and set up the Github actions, you will need to create secrets for the following variables:
 
+* DOCKER_API_TOKEN
+* HEROKU_API_KEY
+* HEROKU_DEPLOY_EMAIL
 * TRELLO_SERVER_TOKEN
 * TRELLO_API_KEY
 * TRELLO_WORKSPACE_ID
+
+In addition, the following two variables are set in the ci.yml workflow and may need to be changed for your specific fork:
+
+* DOCKER_USERNAME
+* HEROKU_APP_NAME

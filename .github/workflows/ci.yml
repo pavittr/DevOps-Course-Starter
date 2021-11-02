@@ -1,25 +1,33 @@
-name: GitHub Actions Demo
-on: [push,pull_request]
+name: Build and test and, optionally, push to DOckerHub and Heroku
+on: [pull_request, push]
+
+env:
+  DOCKER_USERNAME: pavitt
+  HEROKU_APP_NAME: pavittr-devops-todo
+
 jobs:
-  Basic-CI:
+  ci-build:
     runs-on: ubuntu-latest
     steps:
       - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - run: echo "The git reference being built is ${{ github.ref }} from repository ${{ github.repository }}."
+
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "The workflow is now ready to test your code on the runner."
+
       - name: List files in the repository
         run: |
           ls -la ${{ github.workspace }}
+
       - name: Build test image
         run: |
           docker build -t test-image --target test .
+
       - name: Run unit and integration tests
         run: |
           docker run --env-file=.env.test test-image todo_app
+
       - name: Run end to end tests
         run: |
           docker run \
@@ -28,4 +36,33 @@ jobs:
           -e TRELLO_API_KEY=${{ secrets.TRELLO_API_KEY }} \
           -e TRELLO_WORKSPACE_ID=${{ secrets.TRELLO_WORKSPACE_ID }} \
           test-image tests_e2e
+
+      - name: Conditionally build & push to DockerHub
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/exercise-8') }}
+        uses: mr-smithers-excellent/docker-build-push@v3
+        with:
+          image: pavitt/devops-starter
+          tag: "${{ github.sha }}"
+          target: production
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: "${{ env.DOCKER_USERNAME }}"
+          password: "${{ secrets.DOCKER_API_TOKEN }}"
+
+      - name: Conditionally deploy to Heroku
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/exercise-8') }}
+        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: "${{ secrets.HEROKU_API_KEY }}"
+          heroku_app_name: "${{ env.HEROKU_APP_NAME }}" #Must be unique in Heroku
+          heroku_email: "${{ secrets.HEROKU_DEPLOY_EMAIL }}"
+          usedocker: true
+        env:
+          HD_FLASK_APP: "todo_app/app"
+          HD_SECRET_KEY: "secret-key"
+          HD_TRELLO_SERVER_TOKEN: "${{ secrets.TRELLO_SERVER_TOKEN }}"
+          HD_TRELLO_API_KEY: "${{ secrets.TRELLO_API_KEY }}"
+          HD_TRELLO_BOARD_ID: "${{ secrets.TRELLO_BOARD_ID }}"
+          HD_TRELLO_WORKSPACE_ID: "${{ secrets.TRELLO_WORKSPACE_ID }}"
+
       - run: echo "This job's status is ${{ job.status }}."
