@@ -25,7 +25,7 @@ FROM base as production
 
 EXPOSE 8000
 
-ENTRYPOINT ["poetry", "run", "gunicorn", "-b", "0.0.0.0:8000", "-w", "4", "todo_app.app:create_app()"]
+ENTRYPOINT ["./prod_entrypoint.sh"]
 
 FROM base as test
 

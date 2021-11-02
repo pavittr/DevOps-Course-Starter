@@ -39,7 +39,7 @@ jobs:
 
       - name: Conditionally build & push to DockerHub
         if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/exercise-8') }}
-        uses: mr-smithers-excellent/docker-build-push@v3
+        uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: pavitt/devops-starter
           tag: "${{ github.sha }}"
