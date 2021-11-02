@@ -42,7 +42,9 @@ jobs:
         uses: mr-smithers-excellent/docker-build-push@v5
         with:
           image: pavitt/devops-starter
-          tag: "${{ github.sha }}"
+          tags:
+            -  "${{ github.sha }}"
+            -  "latest"
           target: production
           registry: docker.io
           dockerfile: Dockerfile
