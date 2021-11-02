@@ -43,8 +43,8 @@ jobs:
         with:
           image: pavitt/devops-starter
           tags:
-            -  "${{ github.sha }}"
-            -  "latest"
+          - "${{ github.sha }}"
+          - "latest"
           target: production
           registry: docker.io
           dockerfile: Dockerfile
