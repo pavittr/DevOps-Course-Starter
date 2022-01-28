@@ -10,7 +10,7 @@ COPY poetry.toml pyproject.toml /app/
 
 WORKDIR /app
 
-RUN poetry install
+RUN poetry config virtualenvs.create false --local && poetry install
 
 COPY . /app
 
