@@ -57,6 +57,7 @@ jobs:
           heroku_app_name: "${{ env.HEROKU_APP_NAME }}" #Must be unique in Heroku
           heroku_email: "${{ secrets.HEROKU_DEPLOY_EMAIL }}"
           usedocker: true
+          stack: "container"
         env:
           HD_FLASK_APP: "todo_app/app"
           HD_SECRET_KEY: "secret-key"
